@@ -1,7 +1,9 @@
 import { Box, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
 import type { FormSubmission } from '@/types'
 
-// TODO: Replace with actual API call via Orval-generated hooks
+// TODO: Replace with API call once GET /api/v1/form-templates/{templateId}/submissions
+// list endpoint is available. Will also need a template selector to choose which
+// template's submissions to display (submissions are nested under templates in the API).
 const MOCK_SUBMISSIONS: FormSubmission[] = [
   {
     id: '1',
@@ -20,7 +22,7 @@ const MOCK_SUBMISSIONS: FormSubmission[] = [
 ]
 
 export default function FormSubmissionsPage() {
-  // TODO: Replace with useQuery from Orval
+  // TODO: Replace with useQuery from Orval once list submissions endpoint is available
   const submissions = MOCK_SUBMISSIONS
 
   return (
@@ -47,7 +49,7 @@ export default function FormSubmissionsPage() {
                 <TableCell>
                   <code>{JSON.stringify(sub.data)}</code>
                 </TableCell>
-                <TableCell>{new Date(sub.createdAt).toLocaleString()}</TableCell>
+                <TableCell>{sub.createdAt ? new Date(sub.createdAt).toLocaleString() : ''}</TableCell>
               </TableRow>
             ))}
           </TableBody>

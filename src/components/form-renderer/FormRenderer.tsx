@@ -32,7 +32,7 @@ export default function FormRenderer({
       )}
 
       <Stack spacing={2.5}>
-        {template.fields.map((field) => (
+        {(template.fields ?? []).map((field) => (
           <DynamicField key={field.id} field={field} control={control} />
         ))}
       </Stack>

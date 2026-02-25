@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  Alert,
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -16,6 +18,11 @@ import SaveIcon from '@mui/icons-material/Save'
 import FormFieldList from '@/components/form-builder/FormFieldList'
 import FieldEditor from '@/components/form-builder/FieldEditor'
 import type { FormFieldDefinition } from '@/types'
+import {
+  useGetFormTemplate,
+  useCreateFormTemplate,
+  useUpdateFormTemplate,
+} from '@/api/generated/form-template/form-template'
 
 let nextFieldId = 1
 function generateId() {
@@ -44,8 +51,25 @@ export default function TemplateBuilderPage() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingField, setEditingField] = useState<FormFieldDefinition>(createDefaultField())
 
-  // TODO: If editing, load template from API
-  // useEffect(() => { if (id) { fetchTemplate(id) } }, [id])
+  // Fetch existing template when editing
+  const {
+    data: existingTemplate,
+    isLoading,
+    error: fetchError,
+  } = useGetFormTemplate(id!, { query: { enabled: isEditing } })
+
+  const createMutation = useCreateFormTemplate()
+  const updateMutation = useUpdateFormTemplate()
+  const isSaving = createMutation.isPending || updateMutation.isPending
+
+  // Populate state when existing template loads
+  useEffect(() => {
+    if (existingTemplate) {
+      setTemplateName(existingTemplate.name ?? '')
+      setTemplateDescription(existingTemplate.description ?? '')
+      setFields(existingTemplate.fields ?? [])
+    }
+  }, [existingTemplate])
 
   const handleAddField = () => {
     setEditingField(createDefaultField())
@@ -73,15 +97,32 @@ export default function TemplateBuilderPage() {
   }
 
   const handleSaveTemplate = () => {
-    const payload = {
-      name: templateName,
-      description: templateDescription,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      fields: fields.map(({ id, ...rest }) => rest),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const fieldPayloads = fields.map(({ id: _fieldId, ...rest }) => rest)
+
+    if (isEditing && id) {
+      updateMutation.mutate(
+        { templateId: id, data: { name: templateName, description: templateDescription, fields: fieldPayloads } },
+        { onSuccess: () => navigate('/templates') },
+      )
+    } else {
+      createMutation.mutate(
+        { data: { name: templateName, description: templateDescription, fields: fieldPayloads } },
+        { onSuccess: () => navigate('/templates') },
+      )
     }
-    // TODO: Call create/update API
-    console.log(isEditing ? 'Update template:' : 'Create template:', payload)
-    navigate('/templates')
+  }
+
+  if (isEditing && isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (fetchError) {
+    return <Alert severity="error">Failed to load template.</Alert>
   }
 
   return (
@@ -92,11 +133,17 @@ export default function TemplateBuilderPage() {
           variant="contained"
           startIcon={<SaveIcon />}
           onClick={handleSaveTemplate}
-          disabled={!templateName || fields.length === 0}
+          disabled={!templateName || fields.length === 0 || isSaving}
         >
-          Save Template
+          {isSaving ? 'Saving...' : 'Save Template'}
         </Button>
       </Box>
+
+      {(createMutation.error || updateMutation.error) && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to save template. Please try again.
+        </Alert>
+      )}
 
       <Stack spacing={3}>
         <Paper sx={{ p: 3 }}>

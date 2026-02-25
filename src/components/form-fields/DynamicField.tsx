@@ -82,7 +82,7 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
                 {...rhfField}
                 label={field.label}
                 type={field.type}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder ?? undefined}
                 required={field.required}
                 error={!!error}
                 helperText={error?.message}
@@ -95,7 +95,7 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
               <TextField
                 {...rhfField}
                 label={field.label}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder ?? undefined}
                 required={field.required}
                 multiline
                 rows={4}
@@ -225,7 +225,7 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
               <TextField
                 {...rhfField}
                 label={field.label}
-                placeholder={field.placeholder}
+                placeholder={field.placeholder ?? undefined}
                 required={field.required}
                 error={!!error}
                 helperText={error?.message}

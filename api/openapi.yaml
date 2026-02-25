@@ -1,0 +1,510 @@
+openapi: 3.0.3
+info:
+  title: Dynamic Form API
+  description: Backend API for dynamic form management
+  version: 1.0.0
+
+tags:
+  - name: FormTemplate
+    description: Operations on form templates (schema/definitions)
+  - name: FormData
+    description: Operations on form data (submissions)
+
+paths:
+  /api/v1/form-templates:
+    post:
+      tags:
+        - FormTemplate
+      operationId: createFormTemplate
+      summary: Create a new form template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormTemplateRequest'
+      responses:
+        '201':
+          description: Form template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormTemplateResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/form-templates/{templateId}:
+    get:
+      tags:
+        - FormTemplate
+      operationId: getFormTemplate
+      summary: Get a form template by ID
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Form template found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormTemplateResponse'
+        '404':
+          description: Form template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - FormTemplate
+      operationId: updateFormTemplate
+      summary: Update an existing form template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormTemplateUpdateRequest'
+      responses:
+        '200':
+          description: Form template updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormTemplateResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Form template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - FormTemplate
+      operationId: deleteFormTemplate
+      summary: Delete a form template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Form template deleted
+        '404':
+          description: Form template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/form-templates/{templateId}/submissions:
+    post:
+      tags:
+        - FormData
+      operationId: createFormData
+      summary: Submit form data against a template
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormDataRequest'
+      responses:
+        '201':
+          description: Form data created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormDataResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/form-data/{submissionId}:
+    get:
+      tags:
+        - FormData
+      operationId: getFormData
+      summary: Get a specific form submission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Form data found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormDataResponse'
+        '404':
+          description: Form data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - FormData
+      operationId: updateFormData
+      summary: Update a form submission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormDataRequest'
+      responses:
+        '200':
+          description: Form data updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormDataResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Form data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - FormData
+      operationId: deleteFormData
+      summary: Delete a form submission
+      parameters:
+        - name: submissionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Form data deleted
+        '404':
+          description: Form data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    FormTemplateRequest:
+      type: object
+      required:
+        - name
+        - fields
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Employee Onboarding Form"
+        description:
+          type: string
+          maxLength: 1000
+        fields:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FormFieldDefinitionRequest'
+
+    FormTemplateUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        fields:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/FormFieldDefinitionRequest'
+
+    FormTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormFieldDefinition'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    FormFieldDefinition:
+      type: object
+      required:
+        - id
+        - name
+        - label
+        - type
+        - required
+      properties:
+        id:
+          type: string
+          description: Server-generated unique identifier for this field
+        name:
+          type: string
+          description: >
+            Form field key used in submission data.
+            Not required for layout types (heading, separator, section).
+          example: "email"
+        label:
+          type: string
+          description: Display label or display text for layout elements
+          example: "Email Address"
+        type:
+          type: string
+          enum:
+            - text
+            - number
+            - email
+            - password
+            - textarea
+            - date
+            - file
+            - select
+            - radio
+            - checkbox
+            - multibox
+            - section
+            - heading
+            - separator
+        required:
+          type: boolean
+          default: false
+        placeholder:
+          type: string
+          nullable: true
+        defaultValue:
+          type: string
+          nullable: true
+        options:
+          type: array
+          nullable: true
+          description: Required for select, radio, and multibox types
+          items:
+            $ref: '#/components/schemas/SelectOption'
+        validation:
+          $ref: '#/components/schemas/FieldValidation'
+          nullable: true
+
+    FormFieldDefinitionRequest:
+      type: object
+      required:
+        - name
+        - label
+        - type
+        - required
+      properties:
+        name:
+          type: string
+          description: >
+            Form field key used in submission data.
+            Not required for layout types (heading, separator, section).
+          example: "email"
+        label:
+          type: string
+          description: Display label or display text for layout elements
+          example: "Email Address"
+        type:
+          type: string
+          enum:
+            - text
+            - number
+            - email
+            - password
+            - textarea
+            - date
+            - file
+            - select
+            - radio
+            - checkbox
+            - multibox
+            - section
+            - heading
+            - separator
+        required:
+          type: boolean
+          default: false
+        placeholder:
+          type: string
+          nullable: true
+        defaultValue:
+          type: string
+          nullable: true
+        options:
+          type: array
+          nullable: true
+          description: Required for select, radio, and multibox types
+          items:
+            $ref: '#/components/schemas/SelectOption'
+        validation:
+          $ref: '#/components/schemas/FieldValidation'
+          nullable: true
+
+    SelectOption:
+      type: object
+      required:
+        - label
+        - value
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+
+    FieldValidation:
+      type: object
+      description: >
+        Validation rules for the field. Not applicable to layout types.
+        The "preset" field is a user-friendly shortcut that auto-populates "pattern".
+      properties:
+        min:
+          type: number
+          nullable: true
+        max:
+          type: number
+          nullable: true
+        minLength:
+          type: integer
+          nullable: true
+        maxLength:
+          type: integer
+          nullable: true
+        preset:
+          type: string
+          nullable: true
+          enum:
+            - none
+            - email
+            - url
+            - phone
+            - alphanumeric
+            - letters_only
+            - numbers_only
+            - no_special_chars
+        pattern:
+          type: string
+          nullable: true
+          description: Regex pattern (auto-filled from preset on the frontend)
+
+    FormDataRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+          description: >
+            Key-value map where keys match field "name" from the template.
+            Value types depend on field type:
+              text/email/password/textarea/date/select/radio: string,
+              number: string or number,
+              checkbox: boolean,
+              multibox: array of strings,
+              file: string (URL or file reference),
+              heading/separator/section: not present (layout-only)
+
+    FormDataResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        templateId:
+          type: string
+          format: uuid
+        data:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: array
+          items:
+            type: string
