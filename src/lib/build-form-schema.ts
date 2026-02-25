@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import type { FormFieldDefinition } from '@/types'
-
-const LAYOUT_TYPES = ['heading', 'separator', 'section']
+import { LAYOUT_TYPES } from '@/types'
 
 /** Converts a dynamic field definition array into a Zod schema for form validation */
 export function buildFormSchema(

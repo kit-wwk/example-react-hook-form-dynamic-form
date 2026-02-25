@@ -1,4 +1,15 @@
 import { z } from 'zod'
+import { LAYOUT_TYPES } from '@/types'
+
+/** Converts empty strings and null/undefined to undefined, otherwise coerces to number */
+const optionalNumber = z
+  .union([z.number(), z.string(), z.null(), z.undefined()])
+  .transform((val) => {
+    if (val === '' || val === null || val === undefined) return undefined
+    const n = Number(val)
+    return Number.isNaN(n) ? undefined : n
+  })
+  .optional()
 
 const baseSchema = z.object({
   id: z.string(),
@@ -17,10 +28,10 @@ const baseSchema = z.object({
     .nullable(),
   validation: z
     .object({
-      min: z.coerce.number().nullish(),
-      max: z.coerce.number().nullish(),
-      minLength: z.coerce.number().nullish(),
-      maxLength: z.coerce.number().nullish(),
+      min: optionalNumber,
+      max: optionalNumber,
+      minLength: optionalNumber,
+      maxLength: optionalNumber,
       preset: z.string().nullish(),
       pattern: z.string().nullish(),
     })
@@ -30,7 +41,7 @@ const baseSchema = z.object({
 
 /** Zod schema for the FieldEditor form with conditional name validation */
 export const fieldEditorSchema = baseSchema.superRefine((data, ctx) => {
-  const isLayout = ['heading', 'separator', 'section'].includes(data.type)
+  const isLayout = LAYOUT_TYPES.includes(data.type as typeof LAYOUT_TYPES[number])
   if (!isLayout && !data.name) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,

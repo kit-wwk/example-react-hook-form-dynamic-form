@@ -14,5 +14,5 @@ export type {
 } from '@/api/generated/models'
 
 // Frontend-only constants
-export { PRESET_VALIDATORS } from './constants'
+export { PRESET_VALIDATORS, LAYOUT_TYPES, TYPES_WITH_OPTIONS } from './constants'
 export type { PresetValidator } from './constants'

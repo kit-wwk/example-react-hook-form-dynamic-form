@@ -65,7 +65,7 @@ const MOCK_TEMPLATES: FormTemplate[] = [
 
 export default function TemplateListPage() {
   const navigate = useNavigate()
-  const [templates] = useState<FormTemplate[]>(MOCK_TEMPLATES)
+  const [templates, setTemplates] = useState<FormTemplate[]>(MOCK_TEMPLATES)
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null)
   const deleteMutation = useDeleteFormTemplate()
 
@@ -76,6 +76,7 @@ export default function TemplateListPage() {
       {
         onSuccess: () => {
           // TODO: Invalidate template list query once list endpoint is available
+          setTemplates((prev) => prev.filter((t) => t.id !== deleteDialogId))
           setDeleteDialogId(null)
         },
         onError: () => {
@@ -120,14 +121,14 @@ export default function TemplateListPage() {
                 <IconButton
                   size="small"
                   onClick={() => navigate(`/forms/new?templateId=${template.id}`)}
-                  title="Fill Form"
+                  aria-label="Fill form"
                 >
                   <VisibilityIcon fontSize="small" />
                 </IconButton>
                 <IconButton
                   size="small"
                   onClick={() => navigate(`/templates/${template.id}/edit`)}
-                  title="Edit"
+                  aria-label="Edit template"
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>
@@ -135,7 +136,7 @@ export default function TemplateListPage() {
                   size="small"
                   color="error"
                   onClick={() => setDeleteDialogId(template.id ?? null)}
-                  title="Delete"
+                  aria-label="Delete template"
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>

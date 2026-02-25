@@ -20,7 +20,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { FormFieldDefinition, FieldType } from '@/types'
-import { PRESET_VALIDATORS } from '@/types'
+import { PRESET_VALIDATORS, LAYOUT_TYPES, TYPES_WITH_OPTIONS } from '@/types'
 import { fieldEditorSchema } from '@/lib/field-editor-schema'
 
 const FIELD_TYPES: { value: FieldType; label: string; group: string }[] = [
@@ -40,8 +40,6 @@ const FIELD_TYPES: { value: FieldType; label: string; group: string }[] = [
   { value: 'section', label: 'Section', group: 'Layout' },
 ]
 
-const TYPES_WITH_OPTIONS: FieldType[] = ['select', 'radio', 'multibox']
-const LAYOUT_TYPES: FieldType[] = ['heading', 'separator', 'section']
 
 function renderFieldTypeMenuItems() {
   const groups = ['Input', 'Choice', 'Layout']

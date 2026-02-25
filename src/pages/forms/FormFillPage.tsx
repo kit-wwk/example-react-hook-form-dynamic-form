@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Alert, Box, CircularProgress, Paper, Typography } from '@mui/material'
+import { Alert, Box, CircularProgress, Paper, Snackbar, Typography } from '@mui/material'
 import FormRenderer from '@/components/form-renderer/FormRenderer'
 import { useGetFormTemplate } from '@/api/generated/form-template/form-template'
 import { useCreateFormData } from '@/api/generated/form-data/form-data'
@@ -7,6 +8,7 @@ import { useCreateFormData } from '@/api/generated/form-data/form-data'
 export default function FormFillPage() {
   const [searchParams] = useSearchParams()
   const templateId = searchParams.get('templateId')
+  const [successOpen, setSuccessOpen] = useState(false)
 
   const {
     data: template,
@@ -20,7 +22,7 @@ export default function FormFillPage() {
     if (!templateId) return
     submitMutation.mutate(
       { templateId, data: { data } },
-      { onSuccess: () => alert('Form submitted successfully!') },
+      { onSuccess: () => setSuccessOpen(true) },
     )
   }
 
@@ -63,6 +65,12 @@ export default function FormFillPage() {
       <Paper sx={{ p: 3, maxWidth: 600 }}>
         <FormRenderer template={template} onSubmit={handleSubmit} isSubmitting={submitMutation.isPending} />
       </Paper>
+
+      <Snackbar open={successOpen} autoHideDuration={4000} onClose={() => setSuccessOpen(false)}>
+        <Alert severity="success" onClose={() => setSuccessOpen(false)}>
+          Form submitted successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

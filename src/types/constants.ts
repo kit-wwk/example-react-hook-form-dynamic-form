@@ -1,4 +1,12 @@
-import type { FieldValidationPreset } from '@/api/generated/models'
+import type { FieldValidationPreset, FormFieldDefinitionType } from '@/api/generated/models'
+
+type FieldType = FormFieldDefinitionType
+
+/** Layout-only field types (no form value) */
+export const LAYOUT_TYPES: FieldType[] = ['heading', 'separator', 'section']
+
+/** Field types that require options to be configured */
+export const TYPES_WITH_OPTIONS: FieldType[] = ['select', 'radio', 'multibox']
 
 /** Non-nullable preset validator type for frontend use */
 export type PresetValidator = NonNullable<FieldValidationPreset>

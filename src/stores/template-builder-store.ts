@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 import type { FormFieldDefinition } from '@/types'
 
-let nextFieldId = 1
 function generateId() {
-  return `field_${nextFieldId++}`
+  return crypto.randomUUID()
 }
 
 function createDefaultField(): FormFieldDefinition {
