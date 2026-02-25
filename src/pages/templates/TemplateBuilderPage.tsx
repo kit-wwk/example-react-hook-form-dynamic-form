@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Alert,
@@ -17,39 +17,35 @@ import AddIcon from '@mui/icons-material/Add'
 import SaveIcon from '@mui/icons-material/Save'
 import FormFieldList from '@/components/form-builder/FormFieldList'
 import FieldEditor from '@/components/form-builder/FieldEditor'
-import type { FormFieldDefinition } from '@/types'
 import {
   useGetFormTemplate,
   useCreateFormTemplate,
   useUpdateFormTemplate,
 } from '@/api/generated/form-template/form-template'
-
-let nextFieldId = 1
-function generateId() {
-  return `field_${nextFieldId++}`
-}
-
-function createDefaultField(): FormFieldDefinition {
-  return {
-    id: generateId(),
-    name: '',
-    label: '',
-    type: 'text',
-    required: false,
-  }
-}
+import { useTemplateBuilderStore } from '@/stores/template-builder-store'
 
 export default function TemplateBuilderPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = !!id
 
-  const [templateName, setTemplateName] = useState('')
-  const [templateDescription, setTemplateDescription] = useState('')
-  const [fields, setFields] = useState<FormFieldDefinition[]>([])
-  const [editorOpen, setEditorOpen] = useState(false)
-  const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [editingField, setEditingField] = useState<FormFieldDefinition>(createDefaultField())
+  const {
+    templateName,
+    templateDescription,
+    fields,
+    editorOpen,
+    editingIndex,
+    editingField,
+    setTemplateName,
+    setTemplateDescription,
+    deleteField,
+    reorderFields,
+    openAddEditor,
+    openEditEditor,
+    closeEditor,
+    saveField,
+    reset,
+  } = useTemplateBuilderStore()
 
   // Fetch existing template when editing
   const {
@@ -62,39 +58,17 @@ export default function TemplateBuilderPage() {
   const updateMutation = useUpdateFormTemplate()
   const isSaving = createMutation.isPending || updateMutation.isPending
 
-  // Populate state when existing template loads
+  // Populate store when existing template loads
   useEffect(() => {
     if (existingTemplate) {
-      setTemplateName(existingTemplate.name ?? '')
-      setTemplateDescription(existingTemplate.description ?? '')
-      setFields(existingTemplate.fields ?? [])
+      reset(existingTemplate)
     }
-  }, [existingTemplate])
+  }, [existingTemplate, reset])
 
-  const handleAddField = () => {
-    setEditingField(createDefaultField())
-    setEditingIndex(null)
-    setEditorOpen(true)
-  }
-
-  const handleEditField = (index: number) => {
-    setEditingField({ ...fields[index] })
-    setEditingIndex(index)
-    setEditorOpen(true)
-  }
-
-  const handleDeleteField = (index: number) => {
-    setFields((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  const handleSaveField = (field: FormFieldDefinition) => {
-    if (editingIndex !== null) {
-      setFields((prev) => prev.map((f, i) => (i === editingIndex ? field : f)))
-    } else {
-      setFields((prev) => [...prev, field])
-    }
-    setEditorOpen(false)
-  }
+  // Clean up store on unmount
+  useEffect(() => {
+    return () => reset()
+  }, [reset])
 
   const handleSaveTemplate = () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -171,27 +145,27 @@ export default function TemplateBuilderPage() {
             <Typography variant="h6">
               Fields ({fields.length})
             </Typography>
-            <Button variant="outlined" startIcon={<AddIcon />} onClick={handleAddField}>
+            <Button variant="outlined" startIcon={<AddIcon />} onClick={openAddEditor}>
               Add Field
             </Button>
           </Box>
 
           <FormFieldList
             fields={fields}
-            onReorder={setFields}
-            onEdit={handleEditField}
-            onDelete={handleDeleteField}
+            onReorder={reorderFields}
+            onEdit={openEditEditor}
+            onDelete={deleteField}
           />
         </Paper>
       </Stack>
 
-      <Dialog open={editorOpen} onClose={() => setEditorOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={editorOpen} onClose={closeEditor} maxWidth="sm" fullWidth>
         <DialogTitle>{editingIndex !== null ? 'Edit Field' : 'Add Field'}</DialogTitle>
         <DialogContent>
           <FieldEditor
             field={editingField}
-            onSave={handleSaveField}
-            onCancel={() => setEditorOpen(false)}
+            onSave={saveField}
+            onCancel={closeEditor}
           />
         </DialogContent>
       </Dialog>

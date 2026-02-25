@@ -1,6 +1,9 @@
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import DynamicField from '@/components/form-fields/DynamicField'
+import { buildFormSchema } from '@/lib/build-form-schema'
 import type { FormTemplate } from '@/types'
 
 interface FormRendererProps {
@@ -16,8 +19,11 @@ export default function FormRenderer({
   onSubmit,
   isSubmitting,
 }: FormRendererProps) {
+  const schema = useMemo(() => buildFormSchema(template.fields ?? []), [template.fields])
+
   const { control, handleSubmit } = useForm<Record<string, unknown>>({
     defaultValues: defaultValues ?? {},
+    resolver: zodResolver(schema),
   })
 
   return (

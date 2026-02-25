@@ -1,4 +1,5 @@
-import { useForm, useFieldArray, Controller } from 'react-hook-form'
+import { useForm, useFieldArray, Controller, type Resolver } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Box,
   TextField,
@@ -20,6 +21,7 @@ import AddIcon from '@mui/icons-material/Add'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { FormFieldDefinition, FieldType } from '@/types'
 import { PRESET_VALIDATORS } from '@/types'
+import { fieldEditorSchema } from '@/lib/field-editor-schema'
 
 const FIELD_TYPES: { value: FieldType; label: string; group: string }[] = [
   { value: 'text', label: 'Text', group: 'Input' },
@@ -68,6 +70,9 @@ interface FieldEditorProps {
 export default function FieldEditor({ field, onSave, onCancel }: FieldEditorProps) {
   const { control, handleSubmit, watch, setValue } = useForm<FormFieldDefinition>({
     defaultValues: field,
+    // Zod schema uses z.string() for `type` but FormFieldDefinition uses a narrow
+    // string union (FormFieldDefinitionType). Runtime validation is still correct.
+    resolver: zodResolver(fieldEditorSchema) as unknown as Resolver<FormFieldDefinition>,
   })
 
   const { fields: optionFields, append: appendOption, remove: removeOption } = useFieldArray({
@@ -101,7 +106,6 @@ export default function FieldEditor({ field, onSave, onCancel }: FieldEditorProp
         <Controller
           name="label"
           control={control}
-          rules={{ required: 'Label is required' }}
           render={({ field: f, fieldState: { error } }) => (
             <TextField
               {...f}
@@ -118,10 +122,6 @@ export default function FieldEditor({ field, onSave, onCancel }: FieldEditorProp
             <Controller
               name="name"
               control={control}
-              rules={{
-                required: 'Name is required',
-                pattern: { value: /^[a-zA-Z_]\w*$/, message: 'Must be a valid identifier' },
-              }}
               render={({ field: f, fieldState: { error } }) => (
                 <TextField
                   {...f}

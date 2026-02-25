@@ -46,31 +46,11 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
     )
   }
 
-  // Build validation rules
-  const rules: Record<string, unknown> = {}
-  if (field.required) rules.required = `${field.label} is required`
-  if (field.validation?.minLength)
-    rules.minLength = {
-      value: field.validation.minLength,
-      message: `Minimum ${field.validation.minLength} characters`,
-    }
-  if (field.validation?.maxLength)
-    rules.maxLength = {
-      value: field.validation.maxLength,
-      message: `Maximum ${field.validation.maxLength} characters`,
-    }
-  if (field.validation?.pattern)
-    rules.pattern = {
-      value: new RegExp(field.validation.pattern),
-      message: 'Invalid format',
-    }
-
   return (
     <Controller
       name={field.name}
       control={control}
       defaultValue={field.type === 'multibox' ? [] : (field.defaultValue ?? '')}
-      rules={rules}
       render={({ field: rhfField, fieldState: { error } }) => {
         switch (field.type) {
           case 'text':
