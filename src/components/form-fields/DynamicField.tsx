@@ -4,11 +4,16 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  FormGroup,
   RadioGroup,
   Radio,
   Checkbox,
   MenuItem,
   FormHelperText,
+  Typography,
+  Divider,
+  Paper,
+  Box,
 } from '@mui/material'
 import type { FormFieldDefinition } from '@/types'
 
@@ -18,6 +23,30 @@ interface DynamicFieldProps {
 }
 
 export default function DynamicField({ field, control }: DynamicFieldProps) {
+  // Layout-only elements — no form control needed
+  if (field.type === 'heading') {
+    return (
+      <Typography variant="h6" sx={{ mt: 1 }}>
+        {field.label}
+      </Typography>
+    )
+  }
+
+  if (field.type === 'separator') {
+    return <Divider />
+  }
+
+  if (field.type === 'section') {
+    return (
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+          {field.label}
+        </Typography>
+      </Paper>
+    )
+  }
+
+  // Build validation rules
   const rules: Record<string, unknown> = {}
   if (field.required) rules.required = `${field.label} is required`
   if (field.validation?.minLength)
@@ -40,7 +69,7 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
     <Controller
       name={field.name}
       control={control}
-      defaultValue={field.defaultValue ?? ''}
+      defaultValue={field.type === 'multibox' ? [] : (field.defaultValue ?? '')}
       rules={rules}
       render={({ field: rhfField, fieldState: { error } }) => {
         switch (field.type) {
@@ -129,6 +158,35 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
               </FormControl>
             )
 
+          case 'multibox': {
+            const selected = (Array.isArray(rhfField.value) ? rhfField.value : []) as string[]
+            return (
+              <FormControl error={!!error} required={field.required}>
+                <FormLabel>{field.label}</FormLabel>
+                <FormGroup>
+                  {field.options?.map((opt) => (
+                    <FormControlLabel
+                      key={opt.value}
+                      control={
+                        <Checkbox
+                          checked={selected.includes(opt.value)}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...selected, opt.value]
+                              : selected.filter((v) => v !== opt.value)
+                            rhfField.onChange(next)
+                          }}
+                        />
+                      }
+                      label={opt.label}
+                    />
+                  ))}
+                </FormGroup>
+                {error && <FormHelperText>{error.message}</FormHelperText>}
+              </FormControl>
+            )
+          }
+
           case 'date':
             return (
               <TextField
@@ -145,19 +203,21 @@ export default function DynamicField({ field, control }: DynamicFieldProps) {
 
           case 'file':
             return (
-              <TextField
-                label={field.label}
-                type="file"
-                required={field.required}
-                error={!!error}
-                helperText={error?.message}
-                onChange={(e) => {
-                  const input = e.target as HTMLInputElement
-                  rhfField.onChange(input.files?.[0] ?? null)
-                }}
-                slotProps={{ inputLabel: { shrink: true } }}
-                fullWidth
-              />
+              <Box>
+                <TextField
+                  label={field.label}
+                  type="file"
+                  required={field.required}
+                  error={!!error}
+                  helperText={error?.message}
+                  onChange={(e) => {
+                    const input = e.target as HTMLInputElement
+                    rhfField.onChange(input.files?.[0] ?? null)
+                  }}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  fullWidth
+                />
+              </Box>
             )
 
           default:
