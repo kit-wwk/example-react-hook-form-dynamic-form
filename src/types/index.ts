@@ -1,15 +1,15 @@
 // Re-export Orval-generated types with aliases matching the names used across the codebase
 export type {
-  FormTemplateResponse as FormTemplate,
-  FormTemplateRequest as CreateFormTemplatePayload,
-  FormTemplateUpdateRequest as UpdateFormTemplatePayload,
+  TestSessionApplicationFormResponse as FormTemplate,
+  TestSessionApplicationFormRequest as CreateFormTemplatePayload,
+  TestSessionApplicationFormUpdateRequest as UpdateFormTemplatePayload,
   FormFieldDefinition,
   FormFieldDefinitionRequest,
   FormFieldDefinitionType as FieldType,
   SelectOption,
   FieldValidation,
-  FormDataResponse as FormSubmission,
-  FormDataRequest as CreateFormSubmissionPayload,
+  TestSessionSubmissionResponse as FormSubmission,
+  TestSessionSubmissionRequest as CreateFormSubmissionPayload,
   ErrorResponse,
 } from '@/api/generated/models'
 

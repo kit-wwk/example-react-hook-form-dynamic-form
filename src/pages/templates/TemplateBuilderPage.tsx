@@ -18,16 +18,17 @@ import SaveIcon from '@mui/icons-material/Save'
 import FormFieldList from '@/components/form-builder/FormFieldList'
 import FieldEditor from '@/components/form-builder/FieldEditor'
 import {
-  useGetFormTemplate,
-  useCreateFormTemplate,
-  useUpdateFormTemplate,
-} from '@/api/generated/form-template/form-template'
+  useGetTestSessionApplicationForm,
+  useCreateTestSessionApplicationForm,
+  useUpdateTestSessionApplicationForm,
+} from '@/api/generated/test-session-application-form/test-session-application-form'
 import { useTemplateBuilderStore } from '@/stores/template-builder-store'
 
 export default function TemplateBuilderPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = !!id
+  const numericId = id ? Number(id) : 0
 
   const {
     templateName,
@@ -47,15 +48,15 @@ export default function TemplateBuilderPage() {
     reset,
   } = useTemplateBuilderStore()
 
-  // Fetch existing template when editing
+  // Fetch existing application form when editing
   const {
     data: existingTemplate,
     isLoading,
     error: fetchError,
-  } = useGetFormTemplate(id!, { query: { enabled: isEditing } })
+  } = useGetTestSessionApplicationForm(numericId, { query: { enabled: isEditing } })
 
-  const createMutation = useCreateFormTemplate()
-  const updateMutation = useUpdateFormTemplate()
+  const createMutation = useCreateTestSessionApplicationForm()
+  const updateMutation = useUpdateTestSessionApplicationForm()
   const isSaving = createMutation.isPending || updateMutation.isPending
 
   // Populate store when existing template loads
@@ -74,9 +75,9 @@ export default function TemplateBuilderPage() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fieldPayloads = fields.map(({ id: _fieldId, ...rest }) => rest)
 
-    if (isEditing && id) {
+    if (isEditing) {
       updateMutation.mutate(
-        { templateId: id, data: { name: templateName, description: templateDescription, fields: fieldPayloads } },
+        { applicationFormId: numericId, data: { name: templateName, description: templateDescription, fields: fieldPayloads } },
         { onSuccess: () => navigate('/templates') },
       )
     } else {
@@ -96,26 +97,26 @@ export default function TemplateBuilderPage() {
   }
 
   if (fetchError) {
-    return <Alert severity="error">Failed to load template.</Alert>
+    return <Alert severity="error">Failed to load application form.</Alert>
   }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">{isEditing ? 'Edit Template' : 'New Template'}</Typography>
+        <Typography variant="h4">{isEditing ? 'Edit Application Form' : 'New Application Form'}</Typography>
         <Button
           variant="contained"
           startIcon={<SaveIcon />}
           onClick={handleSaveTemplate}
           disabled={!templateName || fields.length === 0 || isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save Template'}
+          {isSaving ? 'Saving...' : 'Save Form'}
         </Button>
       </Box>
 
       {(createMutation.error || updateMutation.error) && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to save template. Please try again.
+          Failed to save application form. Please try again.
         </Alert>
       )}
 
@@ -123,7 +124,7 @@ export default function TemplateBuilderPage() {
         <Paper sx={{ p: 3 }}>
           <Stack spacing={2}>
             <TextField
-              label="Template Name"
+              label="Form Name"
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
               required
