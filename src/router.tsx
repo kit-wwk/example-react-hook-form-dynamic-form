@@ -1,9 +1,12 @@
+import { lazy } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import AppLayout from '@/components/layout/AppLayout'
-import TemplateListPage from '@/pages/templates/TemplateListPage'
-import TemplateBuilderPage from '@/pages/templates/TemplateBuilderPage'
-import FormFillPage from '@/pages/forms/FormFillPage'
-import FormSubmissionsPage from '@/pages/forms/FormSubmissionsPage'
+
+const TemplateListPage = lazy(() => import('@/pages/templates/TemplateListPage'))
+const TemplateBuilderPage = lazy(() => import('@/pages/templates/TemplateBuilderPage'))
+const FormFillPage = lazy(() => import('@/pages/forms/FormFillPage'))
+const FormSubmissionsPage = lazy(() => import('@/pages/forms/FormSubmissionsPage'))
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'))
 
 const router = createBrowserRouter([
   {
@@ -16,6 +19,7 @@ const router = createBrowserRouter([
       { path: 'templates/:id/edit', element: <TemplateBuilderPage /> },
       { path: 'forms', element: <FormSubmissionsPage /> },
       { path: 'forms/new', element: <FormFillPage /> },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ])

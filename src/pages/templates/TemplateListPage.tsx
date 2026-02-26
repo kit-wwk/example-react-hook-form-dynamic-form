@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -20,8 +21,9 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import type { FormTemplate } from '@/types'
+import { useDeleteFormTemplate } from '@/api/generated/form-template/form-template'
 
-// TODO: Replace with actual API call via Orval-generated hooks
+// TODO: Replace with useQuery hook once GET /api/v1/form-templates list endpoint is available
 const MOCK_TEMPLATES: FormTemplate[] = [
   {
     id: '1',
@@ -63,17 +65,34 @@ const MOCK_TEMPLATES: FormTemplate[] = [
 
 export default function TemplateListPage() {
   const navigate = useNavigate()
-  const [templates] = useState<FormTemplate[]>(MOCK_TEMPLATES)
+  const [templates, setTemplates] = useState<FormTemplate[]>(MOCK_TEMPLATES)
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null)
+  const deleteMutation = useDeleteFormTemplate()
 
   const handleDelete = () => {
-    // TODO: Call delete API
-    console.log('Delete template:', deleteDialogId)
-    setDeleteDialogId(null)
+    if (!deleteDialogId) return
+    deleteMutation.mutate(
+      { templateId: deleteDialogId },
+      {
+        onSuccess: () => {
+          // TODO: Invalidate template list query once list endpoint is available
+          setTemplates((prev) => prev.filter((t) => t.id !== deleteDialogId))
+          setDeleteDialogId(null)
+        },
+        onError: () => {
+          setDeleteDialogId(null)
+        },
+      },
+    )
   }
 
   return (
     <Box>
+      {deleteMutation.error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to delete template. Please try again.
+        </Alert>
+      )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Form Templates</Typography>
         <Button
@@ -95,29 +114,29 @@ export default function TemplateListPage() {
                   {template.description}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {template.fields.length} field{template.fields.length !== 1 ? 's' : ''}
+                  {template.fields?.length ?? 0} field{(template.fields?.length ?? 0) !== 1 ? 's' : ''}
                 </Typography>
               </CardContent>
               <CardActions>
                 <IconButton
                   size="small"
                   onClick={() => navigate(`/forms/new?templateId=${template.id}`)}
-                  title="Fill Form"
+                  aria-label="Fill form"
                 >
                   <VisibilityIcon fontSize="small" />
                 </IconButton>
                 <IconButton
                   size="small"
                   onClick={() => navigate(`/templates/${template.id}/edit`)}
-                  title="Edit"
+                  aria-label="Edit template"
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>
                 <IconButton
                   size="small"
                   color="error"
-                  onClick={() => setDeleteDialogId(template.id)}
-                  title="Delete"
+                  onClick={() => setDeleteDialogId(template.id ?? null)}
+                  aria-label="Delete template"
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>

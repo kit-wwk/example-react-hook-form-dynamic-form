@@ -4,9 +4,8 @@ import { Box, Card, CardContent, Chip, IconButton, Stack, Typography } from '@mu
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-import type { FormFieldDefinition, FieldType } from '@/types'
-
-const LAYOUT_TYPES: FieldType[] = ['heading', 'separator', 'section']
+import type { FormFieldDefinition } from '@/types'
+import { LAYOUT_TYPES } from '@/types'
 
 interface SortableFieldItemProps {
   field: FormFieldDefinition
@@ -49,10 +48,10 @@ export default function SortableFieldItem({ field, onEdit, onDelete }: SortableF
           )}
           {field.required && <Chip label="Required" size="small" color="warning" variant="outlined" />}
 
-          <IconButton size="small" onClick={onEdit}>
+          <IconButton size="small" onClick={onEdit} aria-label="Edit field">
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={onDelete} color="error">
+          <IconButton size="small" onClick={onDelete} color="error" aria-label="Delete field">
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Stack>

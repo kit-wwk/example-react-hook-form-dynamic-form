@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
   AppBar,
   Box,
+  CircularProgress,
   Drawer,
   IconButton,
   List,
@@ -25,10 +26,32 @@ const navItems = [
   { label: 'Form Submissions', path: '/forms', icon: <AssignmentIcon /> },
 ]
 
+function isNavItemActive(pathname: string, itemPath: string) {
+  return pathname === itemPath || pathname.startsWith(itemPath + '/')
+}
+
 export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+
+  const navList = (onNavigate?: () => void) => (
+    <List>
+      {navItems.map((item) => (
+        <ListItemButton
+          key={item.path}
+          selected={isNavItemActive(location.pathname, item.path)}
+          onClick={() => {
+            navigate(item.path)
+            onNavigate?.()
+          }}
+        >
+          <ListItemIcon>{item.icon}</ListItemIcon>
+          <ListItemText primary={item.label} />
+        </ListItemButton>
+      ))}
+    </List>
+  )
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -37,6 +60,7 @@ export default function AppLayout() {
           <IconButton
             color="inherit"
             edge="start"
+            aria-label="Toggle navigation"
             onClick={() => setDrawerOpen(!drawerOpen)}
             sx={{ mr: 2, display: { md: 'none' } }}
           >
@@ -58,18 +82,7 @@ export default function AppLayout() {
         }}
       >
         <Toolbar />
-        <List>
-          {navItems.map((item) => (
-            <ListItemButton
-              key={item.path}
-              selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
-        </List>
+        {navList()}
       </Drawer>
 
       {/* Mobile drawer */}
@@ -83,26 +96,20 @@ export default function AppLayout() {
         }}
       >
         <Toolbar />
-        <List>
-          {navItems.map((item) => (
-            <ListItemButton
-              key={item.path}
-              selected={location.pathname === item.path}
-              onClick={() => {
-                navigate(item.path)
-                setDrawerOpen(false)
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
-        </List>
+        {navList(() => setDrawerOpen(false))}
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <Outlet />
+        <Suspense
+          fallback={
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </Box>
     </Box>
   )
