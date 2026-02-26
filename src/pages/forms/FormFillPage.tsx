@@ -2,34 +2,35 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Alert, Box, CircularProgress, Paper, Snackbar, Typography } from '@mui/material'
 import FormRenderer from '@/components/form-renderer/FormRenderer'
-import { useGetFormTemplate } from '@/api/generated/form-template/form-template'
-import { useCreateFormData } from '@/api/generated/form-data/form-data'
+import { useGetTestSessionApplicationForm } from '@/api/generated/test-session-application-form/test-session-application-form'
+import { useCreateTestSessionSubmission } from '@/api/generated/test-session-submission/test-session-submission'
 
 export default function FormFillPage() {
   const [searchParams] = useSearchParams()
-  const templateId = searchParams.get('templateId')
+  const formIdParam = searchParams.get('formId')
+  const formId = formIdParam ? Number(formIdParam) : null
   const [successOpen, setSuccessOpen] = useState(false)
 
   const {
     data: template,
     isLoading,
     error: fetchError,
-  } = useGetFormTemplate(templateId!, { query: { enabled: !!templateId } })
+  } = useGetTestSessionApplicationForm(formId!, { query: { enabled: formId != null } })
 
-  const submitMutation = useCreateFormData()
+  const submitMutation = useCreateTestSessionSubmission()
 
   const handleSubmit = (data: Record<string, unknown>) => {
-    if (!templateId) return
+    if (formId == null) return
     submitMutation.mutate(
-      { templateId, data: { data } },
+      { data: { formId, data } },
       { onSuccess: () => setSuccessOpen(true) },
     )
   }
 
-  if (!templateId) {
+  if (formId == null) {
     return (
       <Box>
-        <Alert severity="info">Please select a template from the Templates page to fill a form.</Alert>
+        <Alert severity="info">Please select an application form from the list to fill it.</Alert>
       </Box>
     )
   }
@@ -45,7 +46,7 @@ export default function FormFillPage() {
   if (fetchError || !template) {
     return (
       <Box>
-        <Alert severity="error">Template not found.</Alert>
+        <Alert severity="error">Application form not found.</Alert>
       </Box>
     )
   }

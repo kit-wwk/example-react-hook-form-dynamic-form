@@ -21,9 +21,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment'
 const DRAWER_WIDTH = 240
 
 const navItems = [
-  { label: 'Templates', path: '/templates', icon: <ListAltIcon /> },
-  { label: 'New Template', path: '/templates/new', icon: <NoteAddIcon /> },
-  { label: 'Form Submissions', path: '/forms', icon: <AssignmentIcon /> },
+  { label: 'Application Forms', path: '/templates', icon: <ListAltIcon /> },
+  { label: 'New Form', path: '/templates/new', icon: <NoteAddIcon /> },
+  { label: 'Submissions', path: '/forms', icon: <AssignmentIcon /> },
 ]
 
 function isNavItemActive(pathname: string, itemPath: string) {
@@ -67,7 +67,7 @@ export default function AppLayout() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-            Dynamic Form Builder
+            Test Session Forms
           </Typography>
         </Toolbar>
       </AppBar>

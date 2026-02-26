@@ -1,34 +1,25 @@
-import { Box, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import type { FormSubmission } from '@/types'
-
-// TODO: Replace with API call once GET /api/v1/form-templates/{templateId}/submissions
-// list endpoint is available. Will also need a template selector to choose which
-// template's submissions to display (submissions are nested under templates in the API).
-const MOCK_SUBMISSIONS: FormSubmission[] = [
-  {
-    id: '1',
-    templateId: '1',
-    data: { name: 'John Doe', email: 'john@example.com', message: 'Hello!' },
-    createdAt: '2026-02-01T10:00:00Z',
-    updatedAt: '2026-02-01T10:00:00Z',
-  },
-  {
-    id: '2',
-    templateId: '2',
-    data: { rating: '5', comments: 'Great service!' },
-    createdAt: '2026-02-10T14:30:00Z',
-    updatedAt: '2026-02-10T14:30:00Z',
-  },
-]
+import { Alert, Box, CircularProgress, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import { useListTestSessionSubmissions } from '@/api/generated/test-session-submission/test-session-submission'
 
 export default function FormSubmissionsPage() {
-  // TODO: Replace with useQuery from Orval once list submissions endpoint is available
-  const submissions = MOCK_SUBMISSIONS
+  const { data: submissions, isLoading, error: fetchError } = useListTestSessionSubmissions()
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (fetchError) {
+    return <Alert severity="error">Failed to load submissions.</Alert>
+  }
 
   return (
     <Box>
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Form Submissions
+        Submissions
       </Typography>
 
       <TableContainer component={Paper} variant="outlined">
@@ -36,16 +27,16 @@ export default function FormSubmissionsPage() {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>Template ID</TableCell>
+              <TableCell>Form ID</TableCell>
               <TableCell>Data</TableCell>
               <TableCell>Submitted At</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {submissions.map((sub) => (
+            {(submissions ?? []).map((sub) => (
               <TableRow key={sub.id}>
                 <TableCell>{sub.id}</TableCell>
-                <TableCell>{sub.templateId}</TableCell>
+                <TableCell>{sub.formId}</TableCell>
                 <TableCell>
                   <code>{JSON.stringify(sub.data)}</code>
                 </TableCell>

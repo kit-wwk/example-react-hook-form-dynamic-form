@@ -7,6 +7,7 @@ import {
   Card,
   CardActions,
   CardContent,
+  CircularProgress,
   Grid,
   IconButton,
   Typography,
@@ -20,63 +21,24 @@ import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import type { FormTemplate } from '@/types'
-import { useDeleteFormTemplate } from '@/api/generated/form-template/form-template'
-
-// TODO: Replace with useQuery hook once GET /api/v1/form-templates list endpoint is available
-const MOCK_TEMPLATES: FormTemplate[] = [
-  {
-    id: '1',
-    name: 'Contact Form',
-    description: 'Basic contact information form',
-    fields: [
-      { id: 'f1', name: 'name', label: 'Full Name', type: 'text', required: true },
-      { id: 'f2', name: 'email', label: 'Email', type: 'email', required: true },
-      { id: 'f3', name: 'message', label: 'Message', type: 'textarea', required: false },
-    ],
-    createdAt: '2026-01-01T00:00:00Z',
-    updatedAt: '2026-01-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    name: 'Feedback Survey',
-    description: 'Customer satisfaction survey',
-    fields: [
-      {
-        id: 'f1',
-        name: 'rating',
-        label: 'Rating',
-        type: 'select',
-        required: true,
-        options: [
-          { label: 'Excellent', value: '5' },
-          { label: 'Good', value: '4' },
-          { label: 'Average', value: '3' },
-          { label: 'Poor', value: '2' },
-          { label: 'Very Poor', value: '1' },
-        ],
-      },
-      { id: 'f2', name: 'comments', label: 'Comments', type: 'textarea', required: false },
-    ],
-    createdAt: '2026-01-15T00:00:00Z',
-    updatedAt: '2026-01-15T00:00:00Z',
-  },
-]
+import {
+  useListTestSessionApplicationForms,
+  useDeleteTestSessionApplicationForm,
+} from '@/api/generated/test-session-application-form/test-session-application-form'
 
 export default function TemplateListPage() {
   const navigate = useNavigate()
-  const [templates, setTemplates] = useState<FormTemplate[]>(MOCK_TEMPLATES)
-  const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null)
-  const deleteMutation = useDeleteFormTemplate()
+  const { data: templates, isLoading, error: fetchError, refetch } = useListTestSessionApplicationForms()
+  const [deleteDialogId, setDeleteDialogId] = useState<number | null>(null)
+  const deleteMutation = useDeleteTestSessionApplicationForm()
 
   const handleDelete = () => {
-    if (!deleteDialogId) return
+    if (deleteDialogId == null) return
     deleteMutation.mutate(
-      { templateId: deleteDialogId },
+      { applicationFormId: deleteDialogId },
       {
         onSuccess: () => {
-          // TODO: Invalidate template list query once list endpoint is available
-          setTemplates((prev) => prev.filter((t) => t.id !== deleteDialogId))
+          refetch()
           setDeleteDialogId(null)
         },
         onError: () => {
@@ -86,26 +48,38 @@ export default function TemplateListPage() {
     )
   }
 
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (fetchError) {
+    return <Alert severity="error">Failed to load application forms.</Alert>
+  }
+
   return (
     <Box>
       {deleteMutation.error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to delete template. Please try again.
+          Failed to delete application form. Please try again.
         </Alert>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Form Templates</Typography>
+        <Typography variant="h4">Application Forms</Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => navigate('/templates/new')}
         >
-          New Template
+          New Form
         </Button>
       </Box>
 
       <Grid container spacing={2}>
-        {templates.map((template) => (
+        {(templates ?? []).map((template) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
             <Card variant="outlined">
               <CardContent>
@@ -120,7 +94,7 @@ export default function TemplateListPage() {
               <CardActions>
                 <IconButton
                   size="small"
-                  onClick={() => navigate(`/forms/new?templateId=${template.id}`)}
+                  onClick={() => navigate(`/forms/new?formId=${template.id}`)}
                   aria-label="Fill form"
                 >
                   <VisibilityIcon fontSize="small" />
@@ -128,7 +102,7 @@ export default function TemplateListPage() {
                 <IconButton
                   size="small"
                   onClick={() => navigate(`/templates/${template.id}/edit`)}
-                  aria-label="Edit template"
+                  aria-label="Edit form"
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>
@@ -136,7 +110,7 @@ export default function TemplateListPage() {
                   size="small"
                   color="error"
                   onClick={() => setDeleteDialogId(template.id ?? null)}
-                  aria-label="Delete template"
+                  aria-label="Delete form"
                 >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
@@ -146,11 +120,11 @@ export default function TemplateListPage() {
         ))}
       </Grid>
 
-      <Dialog open={!!deleteDialogId} onClose={() => setDeleteDialogId(null)}>
-        <DialogTitle>Delete Template</DialogTitle>
+      <Dialog open={deleteDialogId != null} onClose={() => setDeleteDialogId(null)}>
+        <DialogTitle>Delete Application Form</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this template? This action cannot be undone.
+            Are you sure you want to delete this application form? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

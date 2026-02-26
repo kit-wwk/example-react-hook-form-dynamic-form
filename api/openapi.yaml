@@ -1,93 +1,104 @@
 openapi: 3.0.3
 info:
-  title: Dynamic Form API
-  description: Backend API for dynamic form management
+  title: Test Session API
+  description: Backend API for test session application form and submission management
   version: 1.0.0
-
 tags:
-  - name: FormTemplate
-    description: Operations on form templates (schema/definitions)
-  - name: FormData
-    description: Operations on form data (submissions)
-
+  - name: TestSessionApplicationForm
+    description: Operations on test session application forms
+  - name: TestSessionSubmission
+    description: Operations on test session submissions
 paths:
-  /api/v1/form-templates:
+  /api/v1/test-sessions/application-forms:
+    get:
+      tags:
+        - TestSessionApplicationForm
+      operationId: listTestSessionApplicationForms
+      summary: List all test session application forms
+      responses:
+        '200':
+          description: List of test session application forms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestSessionApplicationFormResponse'
     post:
       tags:
-        - FormTemplate
-      operationId: createFormTemplate
-      summary: Create a new form template
+        - TestSessionApplicationForm
+      operationId: createTestSessionApplicationForm
+      summary: Create a new test session application form
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FormTemplateRequest'
+              $ref: '#/components/schemas/TestSessionApplicationFormRequest'
       responses:
         '201':
-          description: Form template created
+          description: Test session application form created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormTemplateResponse'
+                $ref: '#/components/schemas/TestSessionApplicationFormResponse'
         '400':
           description: Invalid request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
-  /api/v1/form-templates/{templateId}:
+  /api/v1/test-sessions/application-forms/{applicationFormId}:
     get:
       tags:
-        - FormTemplate
-      operationId: getFormTemplate
-      summary: Get a form template by ID
+        - TestSessionApplicationForm
+      operationId: getTestSessionApplicationForm
+      summary: Get a test session application form by ID
       parameters:
-        - name: templateId
+        - name: applicationFormId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
-          description: Form template found
+          description: Test session application form found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormTemplateResponse'
+                $ref: '#/components/schemas/TestSessionApplicationFormResponse'
         '404':
-          description: Form template not found
+          description: Test session application form not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-        - FormTemplate
-      operationId: updateFormTemplate
-      summary: Update an existing form template
+        - TestSessionApplicationForm
+      operationId: updateTestSessionApplicationForm
+      summary: Update an existing test session application form
       parameters:
-        - name: templateId
+        - name: applicationFormId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FormTemplateUpdateRequest'
+              $ref: '#/components/schemas/TestSessionApplicationFormUpdateRequest'
       responses:
         '200':
-          description: Form template updated
+          description: Test session application form updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormTemplateResponse'
+                $ref: '#/components/schemas/TestSessionApplicationFormResponse'
         '400':
           description: Invalid request
           content:
@@ -95,117 +106,130 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Form template not found
+          description: Test session application form not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
-        - FormTemplate
-      operationId: deleteFormTemplate
-      summary: Delete a form template
+        - TestSessionApplicationForm
+      operationId: deleteTestSessionApplicationForm
+      summary: Delete a test session application form
       parameters:
-        - name: templateId
+        - name: applicationFormId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
-          description: Form template deleted
+          description: Test session application form deleted
         '404':
-          description: Form template not found
+          description: Test session application form not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
-  /api/v1/form-templates/{templateId}/submissions:
+  /api/v1/test-sessions/submissions:
+    get:
+      tags:
+        - TestSessionSubmission
+      operationId: listTestSessionSubmissions
+      summary: List all submissions
+      parameters:
+        - name: formId
+          in: query
+          required: false
+          description: Filter submissions by application form ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestSessionSubmissionResponse'
     post:
       tags:
-        - FormData
-      operationId: createFormData
-      summary: Submit form data against a template
-      parameters:
-        - name: templateId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - TestSessionSubmission
+      operationId: createTestSessionSubmission
+      summary: Submit data against a test session application form
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FormDataRequest'
+              $ref: '#/components/schemas/TestSessionSubmissionRequest'
       responses:
         '201':
-          description: Form data created
+          description: Submission created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormDataResponse'
+                $ref: '#/components/schemas/TestSessionSubmissionResponse'
         '400':
           description: Invalid request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
-  /api/v1/form-data/{submissionId}:
+  /api/v1/test-session/submissions/{submissionId}:
     get:
       tags:
-        - FormData
-      operationId: getFormData
-      summary: Get a specific form submission
+        - TestSessionSubmission
+      operationId: getTestSessionSubmission
+      summary: Get a specific submission
       parameters:
         - name: submissionId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '200':
-          description: Form data found
+          description: Submission found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormDataResponse'
+                $ref: '#/components/schemas/TestSessionSubmissionResponse'
         '404':
-          description: Form data not found
+          description: Submission not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
-        - FormData
-      operationId: updateFormData
-      summary: Update a form submission
+        - TestSessionSubmission
+      operationId: updateTestSessionSubmission
+      summary: Update a submission
       parameters:
         - name: submissionId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FormDataRequest'
+              $ref: '#/components/schemas/TestSessionSubmissionRequest'
       responses:
         '200':
-          description: Form data updated
+          description: Submission updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormDataResponse'
+                $ref: '#/components/schemas/TestSessionSubmissionResponse'
         '400':
           description: Invalid request
           content:
@@ -213,36 +237,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Form data not found
+          description: Submission not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
-        - FormData
-      operationId: deleteFormData
-      summary: Delete a form submission
+        - TestSessionSubmission
+      operationId: deleteTestSessionSubmission
+      summary: Delete a submission
       parameters:
         - name: submissionId
           in: path
           required: true
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
       responses:
         '204':
-          description: Form data deleted
+          description: Submission deleted
         '404':
-          description: Form data not found
+          description: Submission not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 components:
   schemas:
-    FormTemplateRequest:
+    TestSessionApplicationFormRequest:
       type: object
       required:
         - name
@@ -252,7 +275,7 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          example: "Employee Onboarding Form"
+          example: Employee Onboarding Form
         description:
           type: string
           maxLength: 1000
@@ -261,8 +284,7 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/FormFieldDefinitionRequest'
-
-    FormTemplateUpdateRequest:
+    TestSessionApplicationFormUpdateRequest:
       type: object
       properties:
         name:
@@ -277,13 +299,12 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/FormFieldDefinitionRequest'
-
-    FormTemplateResponse:
+    TestSessionApplicationFormResponse:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
         name:
           type: string
         description:
@@ -298,7 +319,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-
     FormFieldDefinition:
       type: object
       required:
@@ -313,14 +333,13 @@ components:
           description: Server-generated unique identifier for this field
         name:
           type: string
-          description: >
-            Form field key used in submission data.
-            Not required for layout types (heading, separator, section).
-          example: "email"
+          description: |
+            Form field key used in submission data. Not required for layout types (heading, separator, section).
+          example: email
         label:
           type: string
           description: Display label or display text for layout elements
-          example: "Email Address"
+          example: Email Address
         type:
           type: string
           enum:
@@ -356,7 +375,6 @@ components:
         validation:
           $ref: '#/components/schemas/FieldValidation'
           nullable: true
-
     FormFieldDefinitionRequest:
       type: object
       required:
@@ -367,14 +385,13 @@ components:
       properties:
         name:
           type: string
-          description: >
-            Form field key used in submission data.
-            Not required for layout types (heading, separator, section).
-          example: "email"
+          description: |
+            Form field key used in submission data. Not required for layout types (heading, separator, section).
+          example: email
         label:
           type: string
           description: Display label or display text for layout elements
-          example: "Email Address"
+          example: Email Address
         type:
           type: string
           enum:
@@ -410,7 +427,6 @@ components:
         validation:
           $ref: '#/components/schemas/FieldValidation'
           nullable: true
-
     SelectOption:
       type: object
       required:
@@ -421,12 +437,10 @@ components:
           type: string
         value:
           type: string
-
     FieldValidation:
       type: object
-      description: >
-        Validation rules for the field. Not applicable to layout types.
-        The "preset" field is a user-friendly shortcut that auto-populates "pattern".
+      description: |
+        Validation rules for the field. Not applicable to layout types. The "preset" field is a user-friendly shortcut that auto-populates "pattern".
       properties:
         min:
           type: number
@@ -456,34 +470,36 @@ components:
           type: string
           nullable: true
           description: Regex pattern (auto-filled from preset on the frontend)
-
-    FormDataRequest:
+    TestSessionSubmissionRequest:
       type: object
       required:
+        - formId
         - data
       properties:
+        formId:
+          type: integer
+          format: int64
+          description: ID of the test session application form this submission belongs to
         data:
           type: object
           additionalProperties: true
-          description: >
-            Key-value map where keys match field "name" from the template.
-            Value types depend on field type:
+          description: |
+            Key-value map where keys match field "name" from the test session. Value types depend on field type:
               text/email/password/textarea/date/select/radio: string,
               number: string or number,
               checkbox: boolean,
               multibox: array of strings,
               file: string (URL or file reference),
               heading/separator/section: not present (layout-only)
-
-    FormDataResponse:
+    TestSessionSubmissionResponse:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-        templateId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+        formId:
+          type: integer
+          format: int64
         data:
           type: object
           additionalProperties: true
@@ -493,7 +509,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-
     ErrorResponse:
       type: object
       properties:

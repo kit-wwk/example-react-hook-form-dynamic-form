@@ -13,7 +13,7 @@ export default function NotFoundPage() {
         Page not found
       </Typography>
       <Button variant="contained" onClick={() => navigate('/templates')}>
-        Back to Templates
+        Back to Application Forms
       </Button>
     </Box>
   )
